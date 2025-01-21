@@ -61,7 +61,6 @@ func create_user(
 	
 	users_cache[user_id] = user
 	fmt.Printf("User created: %s\t|\tkey: %d\n", user.Name, user_id)
-	response_writer.WriteHeader(http.StatusNoContent)
 }
 
 func get_user(

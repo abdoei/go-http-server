@@ -14,8 +14,21 @@ You can also use `curl` to send a request to the server:
   curl http://localhost:8080/
   ```
 
+- Get a user:
+
+  ```bash
+  curl http://localhost:8080/users/1
+  ```
+
 - POST a user:
 
   ```bash
   curl -X POST -d '{"name":"Ali"}' localhost:8080/users
   ```
+
+- DELETE a user:
+
+  ```bash
+  curl -X DELETE localhost:8080/users/1
+  ```
+  
