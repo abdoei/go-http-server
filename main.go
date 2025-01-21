@@ -21,6 +21,7 @@ func main() {
 	mux.HandleFunc("/", handle_root)
 	mux.HandleFunc("POST /users", create_user)
 	mux.HandleFunc("GET /users/{id}", get_user)
+	mux.HandleFunc("DELETE /users/{id}", delete_user)
 
 	fmt.Println("Server is listening on port :8080")
 	http.ListenAndServe(":8080", mux)
@@ -60,6 +61,7 @@ func create_user(
 	
 	users_cache[user_id] = user
 	fmt.Printf("User created: %s\t|\tkey: %d\n", user.Name, user_id)
+	response_writer.WriteHeader(http.StatusNoContent)
 }
 
 func get_user(
@@ -87,4 +89,39 @@ func get_user(
 	response_writer.WriteHeader(http.StatusOK)
 	response_writer.Header().Set("Content-Type", "application/json")
 	response_writer.Write(j)
+}
+
+func delete_user(
+	response_writer http.ResponseWriter,
+	request *http.Request,
+) {
+	var user_id int
+	_, err := fmt.Sscanf(request.URL.Path, "/users/%d", &user_id)
+	if err != nil {
+		http.Error(
+			response_writer, 
+			fmt.Sprintf("Can't parse the user id. Error: %v\n", err.Error()), 
+			http.StatusNotFound,
+		)
+	}
+
+	users_cache_mutex.RLock()
+	deleted_user, ok := users_cache[user_id]
+	users_cache_mutex.RUnlock()
+	
+	if !ok {
+		http.Error(
+			response_writer, 
+			fmt.Sprintf("User:%d not found\n", user_id), 
+			http.StatusNotFound,
+		)
+		return
+	}
+
+	users_cache_mutex.Lock()
+	delete(users_cache, user_id)
+	users_cache_mutex.Unlock()
+
+	response_writer.WriteHeader(http.StatusOK)
+	response_writer.Write([]byte(fmt.Sprintf("Deleted user %v, ID: %d\n", deleted_user, user_id)))
 }
