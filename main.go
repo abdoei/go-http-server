@@ -20,6 +20,7 @@ func main() {
 
 	mux.HandleFunc("/", handle_root)
 	mux.HandleFunc("POST /users", create_user)
+	mux.HandleFunc("GET /users/{id}", get_user)
 
 	fmt.Println("Server is listening on port :8080")
 	http.ListenAndServe(":8080", mux)
@@ -59,4 +60,31 @@ func create_user(
 	
 	users_cache[user_id] = user
 	fmt.Printf("User created: %s\t|\tkey: %d\n", user.Name, user_id)
+}
+
+func get_user(
+	response_writer http.ResponseWriter,
+	request *http.Request,
+) {
+	var user_id int
+	// TODO: test case of /users/001 shall not equal to /users/1
+	fmt.Sscanf(request.URL.Path, "/users/%d", &user_id)
+
+	users_cache_mutex.RLock()
+	user, ok := users_cache[user_id]
+	users_cache_mutex.RUnlock()
+
+	if !ok {
+		http.Error(response_writer, fmt.Sprintf("User with id:%d not found", user_id), http.StatusNotFound)
+		return
+	}
+
+	j, err := json.Marshal(user)
+	if err != nil {
+		http.Error(response_writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	response_writer.WriteHeader(http.StatusOK)
+	response_writer.Header().Set("Content-Type", "application/json")
+	response_writer.Write(j)
 }

@@ -4,7 +4,7 @@ This is a simple HTTP server written in Go.
 
 ## Usage
 
-After running the server using `go run main.go`, you can access the server at `http://localhost:8080/`.
+After running the server using `go run main.go`, from the browser, you can access the root at `http://localhost:8080/` and the users at `http://localhost:8080/users/{ID-number}` after replacing `{ID-number}` with the user ID that you POSTed.
 
 You can also use `curl` to send a request to the server:
 
