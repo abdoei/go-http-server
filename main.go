@@ -52,13 +52,12 @@ func create_user(
 
 	response_writer.WriteHeader(http.StatusCreated)
 
-	
 	users_cache_mutex.Lock()
 	var user_id int
 	user_id = request_number
 	request_number++
 	users_cache_mutex.Unlock()
-	
+
 	users_cache[user_id] = user
 	fmt.Printf("User created: %s\t|\tkey: %d\n", user.Name, user_id)
 }
@@ -98,8 +97,8 @@ func delete_user(
 	_, err := fmt.Sscanf(request.URL.Path, "/users/%d", &user_id)
 	if err != nil {
 		http.Error(
-			response_writer, 
-			fmt.Sprintf("Can't parse the user id. Error: %v\n", err.Error()), 
+			response_writer,
+			fmt.Sprintf("Can't parse the user id. Error: %v\n", err.Error()),
 			http.StatusNotFound,
 		)
 	}
@@ -107,11 +106,11 @@ func delete_user(
 	users_cache_mutex.RLock()
 	deleted_user, ok := users_cache[user_id]
 	users_cache_mutex.RUnlock()
-	
+
 	if !ok {
 		http.Error(
-			response_writer, 
-			fmt.Sprintf("User:%d not found\n", user_id), 
+			response_writer,
+			fmt.Sprintf("User:%d not found\n", user_id),
 			http.StatusNotFound,
 		)
 		return
